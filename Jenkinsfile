@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_REPO = 'YOUR_DOCKERHUB_USERNAME/quiz-portal'
-        REGISTRY_CREDENTIALS_ID = 'docker-hub-credentials'
-        DB_CREDENTIALS_ID = 'mysql-db-credentials'
-        APP_CONTAINER_NAME = 'quiz-portal-app'
-    }
+    DOCKER_HUB_REPO = 'ameyrane05/quiz-portal'
+    REGISTRY_CREDENTIALS_ID = 'docker-hub-credentials'
+    DB_CREDENTIALS_ID = 'mysql-db-credentials'
+    APP_CONTAINER_NAME = 'quiz-portal-app'
+}
 
     stages {
         stage('Checkout') {
