@@ -36,13 +36,14 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                script {
-                    echo 'Building and pushing Docker image to registry...'
-                    docker.withRegistry('https://index.docker.io/v1/', REGISTRY_CREDENTIALS_ID) {
-                        def appImage = docker.build("${DOCKER_HUB_REPO}:${BUILD_NUMBER}")
-                        appImage.push()
-                        appImage.push("latest")
-                    }
+                withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    echo 'Authenticating, building, and pushing Docker image...'
+                    bat """
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        docker build -t %DOCKER_HUB_REPO%:%BUILD_NUMBER% -t %DOCKER_HUB_REPO%:latest .
+                        docker push %DOCKER_HUB_REPO%:%BUILD_NUMBER%
+                        docker push %DOCKER_HUB_REPO%:latest
+                    """
                 }
             }
         }
@@ -50,7 +51,7 @@ pipeline {
         stage('Security Scan (Trivy)') {
             steps {
                 echo 'Scanning built Docker image for vulnerabilities...'
-                bat "docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL ${DOCKER_HUB_REPO}:${BUILD_NUMBER} || exit 0"
+                bat "docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL %DOCKER_HUB_REPO%:%BUILD_NUMBER% || exit 0"
             }
         }
 
