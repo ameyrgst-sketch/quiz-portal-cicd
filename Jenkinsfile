@@ -6,6 +6,7 @@ pipeline {
         REGISTRY_CREDENTIALS_ID = 'docker-hub-credentials'
         DB_CREDENTIALS_ID = 'mysql-db-credentials'
         APP_CONTAINER_NAME = 'quiz-portal-app'
+        DOCKER_PATH = 'C:\\Users\\Amey\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
     }
 
     stages {
@@ -39,10 +40,10 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     echo 'Authenticating, building, and pushing Docker image...'
                     bat """
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
-                        docker build -t %DOCKER_HUB_REPO%:%BUILD_NUMBER% -t %DOCKER_HUB_REPO%:latest .
-                        docker push %DOCKER_HUB_REPO%:%BUILD_NUMBER%
-                        docker push %DOCKER_HUB_REPO%:latest
+                        "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        "%DOCKER_PATH%" build -t %DOCKER_HUB_REPO%:%BUILD_NUMBER% -t %DOCKER_HUB_REPO%:latest .
+                        "%DOCKER_PATH%" push %DOCKER_HUB_REPO%:%BUILD_NUMBER%
+                        "%DOCKER_PATH%" push %DOCKER_HUB_REPO%:latest
                     """
                 }
             }
@@ -51,7 +52,7 @@ pipeline {
         stage('Security Scan (Trivy)') {
             steps {
                 echo 'Scanning built Docker image for vulnerabilities...'
-                bat "docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL %DOCKER_HUB_REPO%:%BUILD_NUMBER% || exit 0"
+                bat '"%DOCKER_PATH%" run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL %DOCKER_HUB_REPO%:%BUILD_NUMBER% || exit 0'
             }
         }
 
@@ -60,10 +61,10 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: DB_CREDENTIALS_ID, usernameVariable: 'DB_USER', passwordVariable: 'DB_PASS')]) {
                     echo 'Deploying application container...'
                     bat """
-                        docker stop %APP_CONTAINER_NAME% || exit 0
-                        docker rm %APP_CONTAINER_NAME% || exit 0
+                        "%DOCKER_PATH%" stop %APP_CONTAINER_NAME% || exit 0
+                        "%DOCKER_PATH%" rm %APP_CONTAINER_NAME% || exit 0
 
-                        docker run -d ^
+                        "%DOCKER_PATH%" run -d ^
                           --name %APP_CONTAINER_NAME% ^
                           --network quiz-network ^
                           -p 8080:8080 ^
