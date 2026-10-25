@@ -67,7 +67,7 @@ pipeline {
                         "%DOCKER_PATH%" run -d ^
                           --name %APP_CONTAINER_NAME% ^
                           --network quiz-network ^
-                          -p 8080:8080 ^
+                          -p 8090:8090 ^
                           -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/quizdb?useSSL=false^&allowPublicKeyRetrieval=true ^
                           -e SPRING_DATASOURCE_USERNAME=%DB_USER% ^
                           -e SPRING_DATASOURCE_PASSWORD=%DB_PASS% ^
