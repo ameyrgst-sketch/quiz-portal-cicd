@@ -10,7 +10,7 @@ public class ScoreCalculatorService {
         if (correctAnswers < 0 || wrongAnswers < 0) {
             throw new IllegalArgumentException("Counts cannot be negative");
         }
-        return (correctAnswers * 4) - (wrongAnswers * 1);
+        return (correctAnswers * 10) - (wrongAnswers * 1);
     }
 
     public boolean isSubmissionValid(long timeTakenSeconds, long maxAllowedSeconds) {
